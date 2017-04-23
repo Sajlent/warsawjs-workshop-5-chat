@@ -8,4 +8,7 @@ server.on('connection', (client) => {
        client.broadcast.emit('message', msg);
     });
 });
+
+//on startup
+console.log('Server started!');
 server.listen(3000);
