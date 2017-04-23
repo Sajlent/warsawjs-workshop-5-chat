@@ -10,9 +10,22 @@ function clearPrompt() {
     process.stdout.clearLine();
 }
 
+let LOGGED_USER = '';
+
+socket.on('register', (registerSuccess) => {
+    clearPrompt();
+    if (registerSuccess) {
+        console.log('>> REGISTRATION SUCCESFUL!');
+    } else {
+        console.log('>> REGISTRATION FAILED!');
+    }
+    readline.prompt();
+});
+
 socket.on('login', (username) => {
     clearPrompt();
     if (username) {
+        LOGGED_USER = username;
         readline.setPrompt(`${username}: `);
     } else {
         console.log('>> LOGIN FAILED');
@@ -25,6 +38,7 @@ socket.on('message', (msg) => {
     console.log(`>> ${msg}`);
     readline.prompt();
 });
+
 
 readline.on('line', (line) => {
     const lineArgs = line.split(/\s+/);
@@ -46,6 +60,10 @@ readline.on('line', (line) => {
                 password: lineArgs[2]
             });
         }
+    } else if (firstWord === '/logout') {
+        socket.emit('logout', LOGGED_USER);
+        LOGGED_USER = '';
+        readline.setPrompt('> ');
     } else if (line.trim()) {
         socket.emit('message', line);
     }
