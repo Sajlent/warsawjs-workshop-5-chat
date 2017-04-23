@@ -4,15 +4,14 @@ const readline = require('readline').createInterface({
     input: process.stdin,
     output: process.stdout
 });
+let LOGGED_USER = '';
 
 function clearPrompt() {
     process.stdout.cursorTo(0);
     process.stdout.clearLine();
 }
 
-let LOGGED_USER = '';
-
-socket.on('register', (registerSuccess) => {
+function handleRegisterResp(registerSuccess) {
     clearPrompt();
     if (registerSuccess) {
         console.log('>> REGISTRATION SUCCESFUL!');
@@ -20,9 +19,9 @@ socket.on('register', (registerSuccess) => {
         console.log('>> REGISTRATION FAILED!');
     }
     readline.prompt();
-});
+}
 
-socket.on('login', (username) => {
+function handleLoginResp(username) {
     clearPrompt();
     if (username) {
         LOGGED_USER = username;
@@ -31,14 +30,17 @@ socket.on('login', (username) => {
         console.log('>> LOGIN FAILED');
     }
     readline.prompt();
-});
+}
 
-socket.on('message', (msg) => {
+function handleIncomingMessage(msg) {
     clearPrompt();
     console.log(`>> ${msg}`);
     readline.prompt();
-});
+}
 
+socket.on('register', handleRegisterResp);
+socket.on('login', handleLoginResp);
+socket.on('message', handleIncomingMessage);
 
 readline.on('line', (line) => {
     const lineArgs = line.split(/\s+/);

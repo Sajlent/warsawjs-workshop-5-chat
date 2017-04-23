@@ -3,13 +3,15 @@ const server = io();
 
 const USERS = {};
 
-server.on('connection', (client) => {
-    console.log(`Client with ID: ${client.id} connected!`);
-    client.on('message', (msg) => {
-       console.log(msg);
-       client.broadcast.emit('message', msg);
-    });
-    client.on('register', (userObject) => {
+function handleMessage(client) {
+    return (msg) => {
+        console.log(msg);
+        client.broadcast.emit('message', msg);
+    }
+}
+
+function registerUser(client) {
+    return (userObject) => {
         if (USERS[userObject.username]) {
             client.emit('register', false);
         } else {
@@ -19,8 +21,11 @@ server.on('connection', (client) => {
             };
             client.emit('register', true);
         }
-    });
-    client.on('login', (userObject) => {
+    }
+}
+
+function loginUser(client) {
+    return (userObject) => {
         const user = USERS[userObject.username];
         console.log(user);
         if (user.password === userObject.password) {
@@ -29,10 +34,19 @@ server.on('connection', (client) => {
         } else {
             client.emit('login', false);
         }
-    });
-    client.on('logout', (username) => {
-        USERS[username].logged_in = false;
-    });
+    }
+}
+
+function logoutUser(username) {
+    USERS[username].logged_in = false;
+}
+
+server.on('connection', (client) => {
+    console.log(`Client with ID: ${client.id} connected!`);
+    client.on('message', handleMessage(client));
+    client.on('register', registerUser(client));
+    client.on('login', loginUser(client));
+    client.on('logout', logoutUser);
 });
 
 //on startup
